@@ -83,7 +83,7 @@ namespace T4TS
             tsMap.Keys.ToList().ForEach(codeClass =>
             {
                 CodeElements baseClasses = codeClass.Bases;
-                if (baseClasses.Count > 0)
+                if (baseClasses != null && baseClasses.Count > 0)
                 {
                     CodeElement baseClass = baseClasses.Item(1);
                     if (baseClass != null)
@@ -192,7 +192,7 @@ namespace T4TS
             member = new TypeScriptInterfaceMember
             {
                 Name = values.Name ?? property.Name,
-                FullName = property.FullName,
+                //FullName = property.FullName,
                 Optional = values.Optional,
                 Ignore = values.Ignore,
                 Type = (string.IsNullOrWhiteSpace(values.Type))
