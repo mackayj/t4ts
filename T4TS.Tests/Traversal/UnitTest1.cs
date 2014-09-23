@@ -7,6 +7,9 @@ using EnvDTE;
 using Moq;
 using EnvDTE80;
 using System.Reflection;
+using T4TS.Tests.Utils;
+using T4TS.Tests.Models;
+using T4TS.Example.Models;
 
 namespace T4TS.Tests.Traversal
 {
@@ -16,78 +19,12 @@ namespace T4TS.Tests.Traversal
         [TestMethod]
         public void TestMethod1()
         {
-            var moqDte = new Mock<DTE>();
-            var moqSolution = new Mock<Solution>();
-            var moqProject = new Mock<Project>();
-            var moqProjects = new Mock<Projects>();
-            var moqProjectItem = new Mock<ProjectItem>();
-            var moqProjectItems = new Mock<ProjectItems>();
+            var solution = DTETransformer.BuildDteSolution(
+                typeof(LocalModel),
+                typeof(ModelFromDifferentProject)
+            );
 
-            var moqFileCodeModel = new Mock<FileCodeModel>();
-            var moqProjCodeElements = new Mock<CodeElements>();
-            var moqCodeNamespace = new Mock<CodeNamespace>();
-            var moqMembers = new Mock<CodeElements>();
-            var moqMember = new Mock<CodeClass>();
-
-            var moqAttributes = new Mock<CodeElements>();
-            var moqAttribute = new Mock<CodeAttribute>();
-            var moqAttributeChildren = new Mock<CodeElements>();
-            var moqAttributeChild = new Mock<CodeAttributeArgument>();
-
-
-            moqDte.SetupGet(x => x.Solution).Returns(moqSolution.Object);
-            
-            moqSolution.SetupGet(x => x.Projects).Returns(moqProjects.Object);
-            
-            moqProject.SetupGet(x => x.ProjectItems).Returns(moqProjectItems.Object);
-            moqProjects.Setup(x => x.GetEnumerator()).Returns(() => new[] { moqProject.Object }.GetEnumerator());
-
-            moqProjectItem.SetupProperty(x => x.Name, "Foobar");
-            moqProjectItem.SetupGet(x => x.FileCodeModel).Returns(moqFileCodeModel.Object);
-            moqProjectItem.SetupGet(x => x.ProjectItems).Returns((ProjectItems)null);
-            moqProjectItems.Setup(x => x.GetEnumerator()).Returns(() => new[] { moqProjectItem.Object }.GetEnumerator());
-
-            var namespaces = new List<CodeNamespace>
-            { 
-                moqCodeNamespace.Object
-            };
-
-            moqFileCodeModel.SetupGet(x => x.CodeElements).Returns(moqProjCodeElements.Object);
-            moqProjCodeElements.Setup(x => x.GetEnumerator()).Returns(() => namespaces.GetEnumerator());
-
-            var getterType = new Mock<CodeTypeRef>();
-            var getter = new Mock<CodeFunction>();
-            var property = new Mock<CodeProperty>();
-            var properties = new Mock<CodeElements>();
-
-            getterType.SetupGet(x => x.TypeKind).Returns(vsCMTypeRef.vsCMTypeRefString);
-
-            getter.SetupProperty(x => x.Type, getterType.Object);
-            
-            properties.Setup(x => x.GetEnumerator()).Returns(() => new[] { property }.GetEnumerator());
-            property.SetupProperty(x => x.Access, vsCMAccess.vsCMAccessPublic);
-            property.SetupProperty(x => x.Getter, getter.Object);
-            property.SetupProperty(x => x.Name, "FooProperty");
-
-            moqCodeNamespace.SetupGet(x => x.Members).Returns(moqMembers.Object);
-            moqMembers.Setup(x => x.GetEnumerator()).Returns(() => new[] { (object)moqMember.Object, (object)property.Object }.GetEnumerator());
-            moqMember.SetupGet(x => x.Attributes).Returns(moqAttributes.Object);
-            moqMember.SetupGet(x => x.Name).Returns("MoqClass");
-            moqMember.SetupGet(x => x.FullName).Returns("Tests.MoqClass");
-            moqMember.SetupGet(x => x.Bases).Returns((CodeElements)null);
-            moqMember.SetupGet(x => x.Members).Returns(properties.Object);
-
-            moqAttributes.Setup(x => x.GetEnumerator()).Returns(() => new[] { moqAttribute.Object }.GetEnumerator());
-            moqAttribute.SetupGet(x => x.FullName).Returns("T4TS.TypeScriptInterfaceAttribute");
-            moqAttribute.SetupGet(x => x.Children).Returns(moqAttributeChildren.Object);
-
-            moqAttributeChildren.Setup(x => x.GetEnumerator()).Returns(new[] { moqAttributeChild.As<CodeElement>().Object }.GetEnumerator());
-            moqAttributeChild.SetupGet(x => x.Value).Returns("\"Test\"");
-            moqAttributeChild.SetupGet(x => x.Name).Returns("FoobarProp");
-
-
-
-            var codeTraverser = new CodeTraverser(moqSolution.Object, new Settings());
+            var codeTraverser = new CodeTraverser(solution, new Settings());
             var interfaces = codeTraverser.GetAllInterfaces();
         }
     }
