@@ -14,18 +14,19 @@ using T4TS.Example.Models;
 namespace T4TS.Tests.Traversal
 {
     [TestClass]
-    public class UnitTest1
+    public class CodeTraverserTests
     {
         [TestMethod]
-        public void TestMethod1()
+        public void ShouldBuildInterfacesFromMarkedClassesOnly()
         {
             var solution = DTETransformer.BuildDteSolution(
-                typeof(LocalModel),
-                typeof(ModelFromDifferentProject)
+                typeof(LocalModel),                 // has the TypeScriptInterface attribute
+                typeof(ModelFromDifferentProject),  // has the TypeScriptInterface attribute
+                typeof(string)                      // has no TypeScriptInterface attribute
             );
 
             var codeTraverser = new CodeTraverser(solution, new Settings());
-            var interfaces = codeTraverser.GetAllInterfaces();
+            Assert.AreEqual(2, codeTraverser.GetAllInterfaces().Count());
         }
     }
 }
